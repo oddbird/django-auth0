@@ -42,9 +42,21 @@ class Auth0Backend(object):
         username = user_id.replace('|', '-')
 
         try:
-            return UserModel.objects.get(username__iexact=username)
+            user = UserModel.objects.get(username__iexact=username)
         except UserModel.DoesNotExist:
-            return UserModel.objects.create(username=username)
+            user = UserModel.objects.create(username=username)
+
+        if 'given_name' in kwargs and 'family_name' in kwargs:
+            user.first_name = kwargs['given_name']
+            user.last_name = kwargs['family_name']
+        else:
+            user.first_name = kwargs['name']
+        if 'email' in kwargs:
+            user.email = kwargs['email']
+        user.save()
+
+        return user
+
 
     # noinspection PyProtectedMember
     def get_user(self, user_id):
